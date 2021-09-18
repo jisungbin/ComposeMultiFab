@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.ComposeMultiFab" parent="Theme.MaterialComponents.DayNight.DarkActionBar" />
+</resources>
