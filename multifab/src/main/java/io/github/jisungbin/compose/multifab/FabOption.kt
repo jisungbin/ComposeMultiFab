@@ -24,22 +24,40 @@
 
 package io.github.jisungbin.compose.multifab
 
+import android.annotation.SuppressLint
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.graphics.Color
 
-sealed class MultiFabState {
-    object Collapsed : MultiFabState()
-    object Expand : MultiFabState()
+@Immutable
+interface FabOption {
+    @Stable
+    val iconTint: Color
 
-    fun toggleValue() = if (isExpanded()) {
-        Collapsed
-    } else {
-        Expand
-    }
+    @Stable
+    val backgroundTint: Color
 
-    fun isExpanded() = this == Expand
+    @Stable
+    val showLabels: Boolean
 }
 
+private class FabOptionImpl(
+    override val iconTint: Color,
+    override val backgroundTint: Color,
+    override val showLabels: Boolean
+) : FabOption
+
+/**
+ * Affects all fabs including sub fabs.
+ */
+@SuppressLint("ComposableNaming")
 @Composable
-fun rememberMultiFabState() = remember { mutableStateOf<MultiFabState>(MultiFabState.Collapsed) }
+fun FabOption(
+    backgroundTint: Color = MaterialTheme.colors.secondary,
+    iconTint: Color = contentColorFor(backgroundTint),
+    showLabels: Boolean = false
+): FabOption =
+    FabOptionImpl(iconTint = iconTint, backgroundTint = backgroundTint, showLabels = showLabels)

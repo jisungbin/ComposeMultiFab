@@ -1,10 +1,35 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021 Ji Sungbin
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package io.github.jisungbin.compose.multifab
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,8 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,34 +59,35 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun MultiFloatingActionButton(
     modifier: Modifier = Modifier,
-    fabIcon: Painter,
     items: List<MultiFabItem>,
     fabState: MutableState<MultiFabState> = rememberMultiFabState(),
-    fabIconRotate: Boolean = false,
-    showLabels: Boolean = true,
+    fabIcon: FabIcon,
+    fabOption: FabOption = FabOption(),
     onFabItemClicked: (fabItem: MultiFabItem) -> Unit,
     stateChanged: (fabState: MultiFabState) -> Unit = {}
 ) {
-    val rotation by animateFloatAsState(targetValue = if (fabState.value == MultiFabState.Expaned && fabIconRotate) 45f else 0f)
+    val rotation by animateFloatAsState(
+        if (fabState.value == MultiFabState.Expand) fabIcon.iconRotate ?: 0f else 0f
+    )
 
     Column(
         modifier = modifier.wrapContentSize(),
         horizontalAlignment = Alignment.End
     ) {
         AnimatedVisibility(
-            visible = fabState.value == MultiFabState.Expaned,
-            enter = expandVertically(),
-            exit = shrinkVertically()
+            visible = fabState.value.isExpanded(),
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut()
         ) {
             LazyColumn(
                 modifier = Modifier.wrapContentSize(),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                items(items) { item ->
+                items(items = items, key = { it.id }) { item ->
                     MiniFabItem(
                         item = item,
-                        showLabel = showLabels,
+                        fabOption = fabOption,
                         onFabItemClicked = onFabItemClicked
                     )
                 }
@@ -70,15 +95,19 @@ fun MultiFloatingActionButton(
                 item {} // for Spacing
             }
         }
-        FloatingActionButton(onClick = {
-            fabState.value = fabState.value.toggle()
-            stateChanged(fabState.value)
-        }) {
+        FloatingActionButton(
+            onClick = {
+                fabState.value = fabState.value.toggleValue()
+                stateChanged(fabState.value)
+            },
+            backgroundColor = fabOption.backgroundTint,
+            contentColor = fabOption.iconTint
+        ) {
             Icon(
-                painter = fabIcon,
+                painter = painterResource(fabIcon.iconRes),
                 modifier = Modifier.rotate(rotation),
                 contentDescription = null,
-                tint = Color.White
+                tint = fabOption.iconTint
             )
         }
     }
@@ -88,7 +117,7 @@ fun MultiFloatingActionButton(
 @Composable
 private fun MiniFabItem(
     item: MultiFabItem,
-    showLabel: Boolean,
+    fabOption: FabOption,
     onFabItemClicked: (item: MultiFabItem) -> Unit
 ) {
     Row(
@@ -98,7 +127,7 @@ private fun MiniFabItem(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (showLabel) {
+        if (fabOption.showLabels) {
             Text(
                 item.label,
                 fontSize = 12.sp,
@@ -110,12 +139,14 @@ private fun MiniFabItem(
         }
         FloatingActionButton(
             modifier = Modifier.size(40.dp),
-            onClick = { onFabItemClicked(item) }
+            onClick = { onFabItemClicked(item) },
+            backgroundColor = fabOption.backgroundTint,
+            contentColor = fabOption.iconTint
         ) {
             Icon(
-                painter = item.icon,
+                painter = painterResource(item.iconRes),
                 contentDescription = null,
-                tint = Color.White
+                tint = fabOption.iconTint
             )
         }
     }
