@@ -1,3 +1,5 @@
+<img src="https://user-images.githubusercontent.com/40740128/133895784-41d6dfec-f09c-4284-a2c0-5f254601f969.gif" align="right" width="33%"/>
+
 # ComposeMultiFab
 
 android multi-fab that made with jetpack-compose
@@ -12,89 +14,59 @@ implementation "io.github.jisungbin:multifab:${version}"
 
 # Usage
 
-### 1. Create page state variable
-
 ```kotlin
-val fancyNavigationState = remember { mutableStateOf(0) }
-```
-
-
-
-### 2. Create `FancyBottomBar` Items
-
-```kotlin
-val items = listOf(
-    FancyItem("Folders", R.drawable.ic_baseline_folder_24, 0),
-    FancyItem(icon = R.drawable.ic_baseline_error_24, id = 1),
-    FancyItem(title = "Keys", icon = R.drawable.ic_baseline_vpn_key_24, id = 2),
-    FancyItem("More?", id = 3)
+@Composable
+fun MultiFloatingActionButton(
+    modifier: Modifier = Modifier,
+    items: List<MultiFabItem>,
+    fabState: MutableState<MultiFabState> = rememberMultiFabState(),
+    fabIcon: FabIcon,
+    fabOption: FabOption = FabOption(),
+    onFabItemClicked: (fabItem: MultiFabItem) -> Unit,
+    stateChanged: (fabState: MultiFabState) -> Unit = {}
 )
 ```
 
-#### FancyItem
+### MultiFabItem
 
 ```kotlin
-data class FancyItem(
-    val title: String = "", 
-    @DrawableRes val icon: Int? = null,
-    val id: Int = 0
+/**
+ * @param id Cannot be duplicated with the [id] value of another [MultiFabItem].
+ */
+data class MultiFabItem(
+    val id: Int,
+    @DrawableRes val iconRes: Int,
+    val label: String = ""
 )
 ```
 
-
-
-### 3. Setup `FancyBottomBar`
+### FabOption
 
 ```kotlin
-setContent {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Crossfade(
-    	    targetState = fancyNavigationState.value,
-            modifier = Modifier
-                .fillMaxSize()           
-                .padding(bottom = 80.dp) // 80dp: FancyBottomBar default height(60.dp) + bottom margin(20.dp)
-        ) { index ->
-            Text(text = "\uD83C\uDF1F Awesome FancyBottomBar \uD83C\uDF1F\nPage index: $index")
-        }
-        Column(
-    	    modifier = Modifer.fillMaxSize(),
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            FancyBottomBar(
-                modifier = Modifier,
-    		fancyColors = FancyColors(),
-    		fancyOptions = FancyOptions(),
-                items = items
-            ) {
-                fancyNavigationState.value = id
-            }
-        }
-    }
-}
+/**
+ * Affects all fabs including sub fabs.
+ */
+@Composable
+fun FabOption(
+    backgroundTint: Color = MaterialTheme.colors.secondary,
+    iconTint: Color = contentColorFor(backgroundTint),
+    showLabels: Boolean = false
+): FabOption =
+    FabOptionImpl(iconTint = iconTint, backgroundTint = backgroundTint, showLabels = showLabels)
 ```
 
-#### FancyColor
+### FabIcon
 
 ```kotlin
-fun FancyColors(
-    background: Color = Color.White,
-    indicatorBackground: Color = Color.LightGray,
-    primary: Color = Color.Blue
-): FancyColors
+/**
+ * Affects the main fab icon.
+ *
+ * @param iconRes [MultiFloatingActionButton]'s main icon
+ * @param iconRotate If is not null, the [iconRes] rotates as much as [iconRotate] when [MultiFloatingActionButton] is in [MultiFabState.Expand] state.
+ */
+fun FabIcon(@DrawableRes iconRes: Int, iconRotate: Float? = null): FabIcon =
+    FabIconImpl(iconRes = iconRes, iconRotate = iconRotate)
 ```
-
-#### FancyOptions
-
-```kotlin
-fun FancyOptions(
-    fontFamily: FontFamily = FontFamily.Default,
-    indicatorHeight: Dp = 1.dp,
-    barHeight: Dp = 60.dp,
-    titleTopPadding: Dp = 4.dp
-): FancyOptions
-```
-
-
 
 
 ---
