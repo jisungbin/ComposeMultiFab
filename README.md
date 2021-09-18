@@ -51,8 +51,7 @@ fun FabOption(
     backgroundTint: Color = MaterialTheme.colors.secondary,
     iconTint: Color = contentColorFor(backgroundTint),
     showLabels: Boolean = false
-): FabOption =
-    FabOptionImpl(iconTint = iconTint, backgroundTint = backgroundTint, showLabels = showLabels)
+): FabOption
 ```
 
 ### FabIcon
@@ -64,8 +63,7 @@ fun FabOption(
  * @param iconRes [MultiFloatingActionButton]'s main icon
  * @param iconRotate If is not null, the [iconRes] rotates as much as [iconRotate] when [MultiFloatingActionButton] is in [MultiFabState.Expand] state.
  */
-fun FabIcon(@DrawableRes iconRes: Int, iconRotate: Float? = null): FabIcon =
-    FabIconImpl(iconRes = iconRes, iconRotate = iconRotate)
+fun FabIcon(@DrawableRes iconRes: Int, iconRotate: Float? = null): FabIcon
 ```
 
 ---
