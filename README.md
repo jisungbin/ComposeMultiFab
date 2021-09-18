@@ -68,7 +68,6 @@ fun FabIcon(@DrawableRes iconRes: Int, iconRotate: Float? = null): FabIcon =
     FabIconImpl(iconRes = iconRes, iconRotate = iconRotate)
 ```
 
-
 ---
 
 # 🤗 Happy Coding :)
